@@ -53,3 +53,4 @@ CodeCoverage/
 TestResult.xml
 nunit-*.xml
 /src/.vs/FeatureTest.slnx/FileContentIndex/f3650db6-7dbc-4e3c-ac15-554a529bc26c.vsidx
+/src/.vs
