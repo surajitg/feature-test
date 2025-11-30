@@ -1,43 +1,57 @@
-# GitHub Copilot Instructions for .NET Code Review
+# Copilot Code Review Instructions for C# Clean Architecture Project
 
-These instructions guide Copilot (and contributors) to review .NET code using **Clean Architecture** and **Vertical Slice Architecture** principles.
+## Project Structure
+- **Domain Layer**: Contains core business entities, value objects, enums, and domain services. Must remain free of external dependencies.
+- **Business Layer (Application)**: Contains use cases, commands, queries, and business logic. Should depend only on Domain layer. Implements vertical slice architecture for pages.
+- **Infrastructure Layer**: Contains persistence, external services, and framework-specific implementations. Depends on Business and Domain layers but never the other way around.
+
+## Review Guidelines
+
+### ✅ Architecture & Layering
+- Ensure **no direct dependencies** from Domain → Infrastructure or Domain → Business.
+- Verify **Dependency Injection** is used for all external services, repositories, and handlers.
+- Check that **vertical slice architecture** is respected:
+  - Each feature (command/query/page) is self-contained.
+  - Handlers, DTOs, and validators are grouped per slice.
+
+### ✅ Coding Best Practices
+- Follow **C# coding conventions** (naming, spacing, async/await usage).
+- Ensure **SOLID principles** are applied:
+  - Single Responsibility: Each class has one clear purpose.
+  - Open/Closed: Classes are extendable without modification.
+  - Dependency Inversion: High-level modules depend on abstractions.
+- Validate **exception handling** and proper use of `ILogger<T>` for logging.
+- Confirm **unit tests** exist for business logic and domain rules.
+
+### ✅ Dependency Injection
+- All services, repositories, and handlers must be registered in DI container.
+- Avoid **service locator anti-pattern**.
+- Ensure scoped vs singleton lifetimes are correctly applied.
+
+### ✅ Vertical Slice Pages
+- Each page/feature should:
+  - Have its own command/query + handler.
+  - Keep controllers thin (delegate to handlers).
+  - Use MediatR or equivalent for request/response handling.
+- Ensure **validation** is implemented via FluentValidation or similar.
+
+### ✅ Infrastructure
+- Repository implementations must follow **interface contracts** defined in Business layer.
+- Database context should be injected, not instantiated directly.
+- External API calls should be abstracted behind interfaces.
+
+### ✅ Security & Performance
+- Ensure **input validation** and **null checks** are present.
+- Avoid **blocking calls** in async code.
+- Confirm **EF Core queries** are optimized (no N+1 issues).
+- Sensitive data must not be logged.
 
 ---
 
-## 1. Clean Architecture Principles
-- Domain layer contains only business rules and entities.
-- Application layer orchestrates use cases, independent of infrastructure.
-- Infrastructure layer implements interfaces for persistence/external services.
-- Presentation layer depends only on Application layer.
-- No direct references from Domain → Infrastructure.
-- Business logic must be unit‑testable without external dependencies.
-
----
-
-## 2. Vertical Slice Architecture Principles
-- Each feature/use case is self‑contained:
-  - Request/Response models, handler, and validation grouped together.
-- CQRS alignment:
-  - Commands mutate state; Queries return data.
-- Folder structure:
-  - Features organized by slice (e.g., `Features/Orders/CreateOrder`).
-- Avoid cross‑slice coupling unless explicitly required.
-
----
-
-## 3. Code Quality Checklist
-- Naming conventions follow .NET standards.
-- Async/await usage is correct; avoid blocking calls.
-- Dependency Injection is consistent.
-- Validation logic is explicit, not hidden in controllers.
-- Logging and exception handling are consistent across slices.
-- Unit and integration tests exist for each vertical slice.
-
----
-
-## 4. Review Output Expectations
-When Copilot reviews code:
-- Highlight violations of Clean or Vertical Slice principles.
-- Suggest refactoring strategies (e.g., move logic from controller → handler).
-- Recommend improvements in readability, maintainability, and testability.
-- Provide concise examples of better structure when needed.
+## Copilot Review Prompts
+When reviewing pull requests, Copilot should:
+1. Check adherence to Clean Architecture boundaries.
+2. Flag violations of dependency rules (e.g., Domain referencing Infrastructure).
+3. Suggest improvements for DI registration and lifetimes.
+4. Recommend refactoring if vertical slice boundaries are blurred.
+5. Ensure code readability, maintainability, and performance best practices.
